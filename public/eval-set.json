@@ -1,0 +1,12 @@
+[
+  { "q": "How much does a root canal on a molar cost?", "gold": [{ "doc": "services-and-prices", "title": "Fillings and root canals" }] },
+  { "q": "What is the fee if I cancel 5 hours before my appointment?", "gold": [{ "doc": "appointments-and-cancellations", "title": "Cancellations" }] },
+  { "q": "Is the clinic open on Sunday?", "gold": [{ "doc": "appointments-and-cancellations", "title": "Opening hours" }] },
+  { "q": "Do you accept payment by cheque?", "gold": [{ "doc": "insurance-and-payments", "title": "Payment methods" }] },
+  { "q": "Can I pay for teeth whitening in EMI?", "gold": [{ "doc": "insurance-and-payments", "title": "EMI" }] },
+  { "q": "How long should I avoid using a straw after an extraction?", "gold": [{ "doc": "aftercare", "title": "extraction" }] },
+  { "q": "Which branch has parking?", "gold": [{ "doc": "appointments-and-cancellations", "title": "Branches" }] },
+  { "q": "Is the advance for aligners refundable?", "gold": [{ "doc": "insurance-and-payments", "title": "Refunds" }] },
+  { "q": "Do you offer laser gum surgery?", "gold": [] },
+  { "q": "What is the name of the head dentist?", "gold": [] }
+]

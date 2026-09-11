@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Docs Q&amp;A — RAG with citations</title>
+<meta name="description" content="Ask questions about your documents. Hybrid retrieval, inline citations, a refusal path and a small eval. Built by Yash Harkawat." />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Docs Q&amp;A <span class="tag">RAG</span></h1>
+    <p class="sub">Answers come only from your documents, with a citation on every fact. If the documents don't say it, it says so.</p>
+    <nav>
+      <button class="tab active" data-tab="ask">Ask</button>
+      <button class="tab" data-tab="docs">Documents</button>
+      <button class="tab" data-tab="eval">Eval</button>
+      <button class="tab" data-tab="how">How it works</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <p id="status" class="status">Loading documents…</p>
+
+  <section id="tab-ask" class="panel">
+    <form id="ask-form">
+      <input id="q" type="text" maxlength="500" placeholder="Ask about the loaded documents…" autocomplete="off" />
+      <button type="submit" id="ask-btn">Ask</button>
+    </form>
+    <div id="suggest" class="chips"></div>
+    <div id="answer" class="answer" hidden></div>
+    <div id="meta" class="meta"></div>
+    <h3 id="src-h" hidden>Retrieved passages <small>(hybrid search, top 5 — cited ones are highlighted)</small></h3>
+    <ol id="sources" class="sources"></ol>
+  </section>
+
+  <section id="tab-docs" class="panel" hidden>
+    <p>Loaded documents are searched together. Uploaded files are chunked and embedded <b>in your browser</b>; nothing is stored. Only the 5 passages retrieved for a question are sent to the model.</p>
+    <label class="upload">
+      <input id="file" type="file" accept=".pdf,.md,.markdown,.txt" multiple />
+      <span>Upload PDF, Markdown or text</span>
+    </label>
+    <button id="clear-samples" class="ghost">Remove the sample documents</button>
+    <table class="grid"><thead><tr><th>Document</th><th>Source</th><th>Chunks</th></tr></thead><tbody id="doc-rows"></tbody></table>
+  </section>
+
+  <section id="tab-eval" class="panel" hidden>
+    <p>10 hand-written questions about the sample documents: 8 have an answer in the docs, 2 don't (the right behaviour there is to refuse). Each row shows whether retrieval found the right passage, whether the answer cited it, whether it refused correctly, and whether a second model judged the answer faithful to the sources.</p>
+    <button id="run-eval">Run the eval</button>
+    <div id="eval-summary" class="summary"></div>
+    <table class="grid"><thead><tr><th>#</th><th>Question</th><th>Retrieval hit@5</th><th>Cited the right passage</th><th>Refusal correct</th><th>Faithful</th><th>Model</th></tr></thead><tbody id="eval-rows"></tbody></table>
+  </section>
+
+  <section id="tab-how" class="panel" hidden>
+    <ol class="how">
+      <li><b>Chunking.</b> Documents are split by heading (PDFs by page), then packed into passages of up to ~900 characters, so a passage never mixes two topics.</li>
+      <li><b>Embeddings.</b> Each passage is turned into a 384-number vector with <code>all-MiniLM-L6-v2</code>, running in your browser via transformers.js. The sample docs were embedded ahead of time with the same model.</li>
+      <li><b>Hybrid retrieval.</b> A question is scored two ways: BM25 keyword match (catches exact terms like "OPG" or "Koramangala") and vector similarity (catches paraphrases like "fee" vs "costs"). The two rankings are merged with Reciprocal Rank Fusion and the top 5 passages are kept.</li>
+      <li><b>Answering.</b> Only those 5 passages go to a free LLM (via OpenRouter) with strict rules: cite every fact as [n], never use outside knowledge, and reply "I can't find that in the documents" when the answer isn't there.</li>
+      <li><b>Guards.</b> After the model replies, citations to passages it wasn't given are removed, and an answer with no valid citation is withheld and replaced by the refusal. The Eval tab measures how well all this works.</li>
+    </ol>
+    <p>Source code and write-up: <a href="https://github.com/yashharkawat/rag-docs-qa" target="_blank" rel="noopener">github.com/yashharkawat/rag-docs-qa</a>. The sample clinic handbook is fictional.</p>
+  </section>
+</main>
+<footer class="wrap">Built by <a href="https://yashharkawat.com" target="_blank" rel="noopener">Yash Harkawat</a> · free models only · no data stored</footer>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
