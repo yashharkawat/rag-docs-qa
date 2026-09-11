@@ -1,6 +1,6 @@
 # Docs Q&A — retrieval-augmented generation with citations
 
-**Live demo:** LIVE_URL_PLACEHOLDER
+**Live demo:** https://rag-docs-qa.vercel.app
 
 Ask questions about a set of documents and get short answers where every fact carries a citation to the passage it came from. If the documents don't contain the answer, it says so instead of guessing. It ships with a fictional dental clinic's handbook, and you can upload your own PDF, Markdown or text files.
 
