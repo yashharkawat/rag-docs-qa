@@ -34,12 +34,25 @@ function getExtractor() {
       setStatus("Loading the embedding model in your browser (about 23 MB, first visit only)…");
       const { pipeline, env } = await import(TRANSFORMERS);
       env.allowLocalModels = false;
-      const ex = await pipeline("feature-extraction", MODEL, {
-        dtype: "q8",
-        progress_callback: (p) => {
-          if (p.status === "progress" && String(p.file).endsWith(".onnx")) setStatus(`Downloading the embedding model… ${Math.round(p.progress)}%`);
-        },
-      });
+      const load = () =>
+        pipeline("feature-extraction", MODEL, {
+          dtype: "q8",
+          progress_callback: (p) => {
+            if (p.status === "progress" && String(p.file).endsWith(".onnx")) setStatus(`Downloading the embedding model… ${Math.round(p.progress)}%`);
+          },
+        });
+      // The model files come from the Hugging Face CDN; a single dropped request shouldn't break the page.
+      let ex;
+      for (let attempt = 1; ; attempt++) {
+        try {
+          ex = await load();
+          break;
+        } catch (e) {
+          if (attempt >= 3) throw e;
+          setStatus(`Model download hiccup (${e.message}), retrying ${attempt + 1}/3…`);
+          await new Promise((r) => setTimeout(r, 1500 * attempt));
+        }
+      }
       setStatus(`Ready. ${state.index.chunks.length} passages from ${state.docs.size} documents. Embeddings run locally in your browser.`);
       return ex;
     })().catch((e) => {
