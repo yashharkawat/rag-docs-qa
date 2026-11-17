@@ -4,6 +4,7 @@
 //  2. an answer with no valid citation is withheld and replaced by the refusal, so an unsupported answer
 //     never reaches the user even if the model ignores the instructions.
 import { chat } from "../lib/openrouter.js";
+import { guard, BUSY } from "../lib/guard.js";
 
 export const REFUSAL = "I can't find that in the documents.";
 
@@ -29,7 +30,7 @@ export function postProcess(text, sources) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!guard(req, res, { perMinute: 6, perDay: 40 })) return;
   const { question, sources } = req.body || {};
   if (typeof question !== "string" || !question.trim() || question.length > 500)
     return res.status(400).json({ error: "question must be 1-500 characters" });
@@ -49,6 +50,6 @@ export default async function handler(req, res) {
     const r = await chat({ messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }], maxTokens: 400, temperature: 0 });
     return res.status(200).json({ ...postProcess(r.content, srcs), model: r.model, latency_ms: Date.now() - t0, usage: r.usage, tried: r.tried });
   } catch (e) {
-    return res.status(502).json({ error: e.message.slice(0, 400), tried: e.tried || [] });
+    return res.status(503).json({ error: BUSY, tried: e.tried || [] });
   }
 }
